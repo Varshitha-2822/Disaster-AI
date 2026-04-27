@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Operations | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            min-height: calc(100vh - 80px);
+        }
+        .admin-sidebar {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 104px;
+        }
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .side-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .side-nav a:hover, .side-nav a.active {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .side-nav a.active {
+            box-shadow: 0 4px 12px rgba(5, 59, 80, 0.2);
+        }
+        .admin-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .admin-stat-card {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .admin-stat-card i {
+            font-size: 24px;
+            color: var(--secondary);
+            opacity: 0.8;
+        }
+        .admin-stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .admin-stat-card .label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        /* Premium File Upload Styles */
+        .upload-container {
+            width: 100%;
+        }
+        .upload-drop-zone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-lg);
+            background-color: var(--bg-main);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+        .upload-drop-zone:hover, .upload-drop-zone.dragover {
+            border-color: var(--secondary);
+            background-color: rgba(100, 204, 197, 0.05);
+        }
+        .upload-icon-circle {
+            width: 64px;
+            height: 64px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--secondary);
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: 0.3s ease;
+        }
+        .upload-drop-zone:hover .upload-icon-circle {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+        .upload-text .main-text {
+            display: block;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+        .upload-text .sub-text {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+        .file-info {
+            margin-top: 16px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .selected-file {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .remove-file {
+            margin-left: auto;
+            cursor: pointer;
+            color: var(--error);
+            opacity: 0.6;
+            transition: 0.2s;
+            font-size: 18px;
+        }
+        .remove-file:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .upload-status {
+            margin-top: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .hidden { display: none !important; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <div style="font-size: 13px; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user-shield"></i> {{ user.username|upper }}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div class="admin-layout">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <div style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 12px;">Operational Level</div>
+                    <div style="background-color: var(--secondary); color: var(--primary); display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800;">
+                        {{ user.role|upper }}
+                    </div>
+                </div>
+                <nav class="side-nav">
+                    <a href="{{ url_for('admin_dashboard') }}" class="active"><i class="fas fa-th-large"></i> Command Center</a>
+                    <a href="{{ url_for('admin_stakeholders') }}"><i class="fas fa-users-rectangle"></i> Stakeholders</a>
+                    <a href="{{ url_for('admin_users') }}"><i class="fas fa-address-card"></i> User Directory</a>
+                    <a href="{{ url_for('admin_config') }}"><i class="fas fa-sliders"></i> System Logic</a>
+                    <a href="{{ url_for('admin_classify') }}"><i class="fas fa-microchip"></i> ML Terminal</a>
+                    <div style="height: 1px; background-color: var(--border); margin: 16px 0;"></div>
+                    <a href="{{ url_for('dashboard') }}"><i class="fas fa-gauge-high"></i> Monitoring Portal</a>
+                    <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i> Terminate Session</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                            <i class="fas fa-shield-halved"></i> Security Operations Center
+                        </div>
+                        <h1 style="font-size: 36px; color: var(--primary);">Command Interface</h1>
+                    </div>
+                    <div style="text-align: right; font-size: 13px; color: var(--text-muted);">
+                        Last Synced: {{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'N/A' }}
+                    </div>
+                </div>
+
+                <div class="admin-stat-grid">
+                    <div class="admin-stat-card">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <div class="label">System Entities</div>
+                            <div class="value">{{ total_users }}</div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            Active: {{ active_users }} | Admins: {{ admin_count }}
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <i class="fas fa-address-book"></i>
+                        <div>
+                            <div class="label">Stakeholder Nodes</div>
+                            <div class="value">{{ total_stakeholders }}</div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            Subscribed: {{ subscribed_stakeholders }} Nodes
+                        </div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <i class="fas fa-tower-broadcast"></i>
+                        <div>
+                            <div class="label">Total Transmissions</div>
+                            <div class="value">{{ total_alerts }}</div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-muted);">
+                            Success: {{ successful_alerts }} | Recent: {{ recent_alerts }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 24px; border-left: 4px solid var(--secondary);">
+                    <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 16px;">
+                        <i class="fas fa-microchip"></i> Latest Sensor Signals
+                    </h3>
+                    <div id="adminSensorSummary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; font-size: 13px;">
+                        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 10px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 11px;">Rainfall</div>
+                            <div id="adminRainfall" style="font-size: 20px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 10px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 11px;">River Level</div>
+                            <div id="adminRiver" style="font-size: 20px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                        <div style="padding: 16px; border: 1px solid var(--border); border-radius: 10px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 11px;">Soil Moisture</div>
+                            <div id="adminSoil" style="font-size: 20px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 24px; border-left: 4px solid var(--primary);">
+                    <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px;">
+                        <i class="fas fa-file-upload"></i> Upload Sensor Data
+                    </h3>
+                    <form id="sensorUploadForm" class="upload-container">
+                        <label for="sensorUploadFile" class="upload-drop-zone" id="dropZone">
+                            <div class="upload-icon-circle">
+                                <i class="fas fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="upload-text">
+                                <span class="main-text">Click to choose or drag & drop</span>
+                                <span class="sub-text">Supported formats: CSV or JSON</span>
+                            </div>
+                            <input id="sensorUploadFile" name="file" type="file" accept=".csv,.json" hidden>
+                        </label>
+                        
+                        <div id="fileInfo" class="file-info hidden">
+                            <div class="selected-file">
+                                <i class="fas fa-file-csv" style="font-size: 20px; color: var(--secondary);"></i>
+                                <span id="fileName">No file selected</span>
+                                <i class="fas fa-times-circle remove-file" id="removeFile"></i>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px; padding: 12px;">
+                                <i class="fas fa-microchip"></i> INGEST SIGNAL DATA
+                            </button>
+                        </div>
+                        
+                        <div id="sensorUploadStatus" class="upload-status"></div>
+                    </form>
+                </div>
+
+                <div class="card" style="padding: 24px; border-left: 4px solid var(--primary);">
+                    <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 16px;">
+                        <i class="fas fa-map-location-dot"></i> Operational Map Overview
+                    </h3>
+                    <div style="height: 360px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border);">
+                        <div id="map" style="height: 100%; width: 100%;"></div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                    <div class="card" style="padding: 32px;">
+                        <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-bolt"></i> Accelerated Access</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <a href="{{ url_for('admin_stakeholders') }}" class="btn btn-outline" style="text-align: center; padding: 24px 16px;">
+                                <i class="fas fa-users-rectangle" style="display: block; font-size: 24px; margin-bottom: 12px;"></i>
+                                STAKEHOLDERS
+                            </a>
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-outline" style="text-align: center; padding: 24px 16px;">
+                                <i class="fas fa-user-gear" style="display: block; font-size: 24px; margin-bottom: 12px;"></i>
+                                USER CONFIG
+                            </a>
+                            <a href="{{ url_for('admin_config') }}" class="btn btn-outline" style="text-align: center; padding: 24px 16px;">
+                                <i class="fas fa-gears" style="display: block; font-size: 24px; margin-bottom: 12px;"></i>
+                                PARAMETERS
+                            </a>
+                            <a href="{{ url_for('admin_classify') }}" class="btn btn-outline" style="text-align: center; padding: 24px 16px;">
+                                <i class="fas fa-brain-circuit" style="display: block; font-size: 24px; margin-bottom: 12px;"></i>
+                                ML_ANALYSIS
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card" style="padding: 32px; border-left: 4px solid var(--secondary);">
+                        <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-microchip"></i> Operational Status</h3>
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                                <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Neural DB Connection</div>
+                                <div style="color: #20C997; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-circle" style="font-size: 8px;"></i> STABLE
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                                <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">SMTP Transmission Link</div>
+                                <div style="color: #20C997; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-circle" style="font-size: 8px;"></i> ONLINE
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                                <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Geospatial Satellites</div>
+                                <div style="color: var(--secondary); font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-circle" style="font-size: 8px;"></i> {{ zones|length if zones else 0 }} ACTIVE
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Process Pulse</div>
+                                <div style="color: #20C997; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                    <i class="fas fa-bolt"></i> SYNCHRONIZED
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script>
+        async function loadAdminMapZones() {
+            try {
+                const res = await fetch('/api/zones');
+                const data = await res.json();
+                const zones = data && data.zones ? data.zones : (Array.isArray(data) ? data : []);
+                window.zonesData = zones;
+                if (typeof window.updateMapWithZones === 'function') {
+                    window.updateMapWithZones(zones);
+                }
+            } catch (e) {
+                console.error('Admin map load failed:', e);
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAdminMapZones);
+        } else {
+            loadAdminMapZones();
+        }
+        async function loadAdminSensors() {
+            try {
+                const res = await fetch('/api/sensors/latest');
+                const data = await res.json();
+                const latest = data.latest || {};
+                const rain = (latest.rainfall && latest.rainfall[0]) ? latest.rainfall[0].value : '--';
+                const river = (latest.river && latest.river[0]) ? latest.river[0].value : '--';
+                const soil = (latest.soil && latest.soil[0]) ? latest.soil[0].value : '--';
+                const rainEl = document.getElementById('adminRainfall');
+                const riverEl = document.getElementById('adminRiver');
+                const soilEl = document.getElementById('adminSoil');
+                if (rainEl) rainEl.textContent = rain !== '--' ? `${rain} mm` : '--';
+                if (riverEl) riverEl.textContent = river !== '--' ? `${river} m` : '--';
+                if (soilEl) soilEl.textContent = soil !== '--' ? soil : '--';
+            } catch (e) {
+                console.error('Admin sensor load failed:', e);
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAdminSensors);
+        } else {
+            loadAdminSensors();
+        }
+        const uploadForm = document.getElementById('sensorUploadForm');
+        const fileInput = document.getElementById('sensorUploadFile');
+        const dropZone = document.getElementById('dropZone');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameDisplay = document.getElementById('fileName');
+        const removeFileBtn = document.getElementById('removeFile');
+        const statusEl = document.getElementById('sensorUploadStatus');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    fileNameDisplay.textContent = fileInput.files[0].name;
+                    fileInfo.classList.remove('hidden');
+                    dropZone.classList.add('hidden');
+                    if (statusEl) statusEl.textContent = '';
+                }
+            });
+        }
+
+        if (removeFileBtn) {
+            removeFileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                fileInput.value = '';
+                fileInfo.classList.add('hidden');
+                dropZone.classList.remove('hidden');
+                if (statusEl) statusEl.textContent = '';
+            });
+        }
+
+        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+            if (dropZone) {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    if (eventName === 'dragover') dropZone.classList.add('dragover');
+                    else dropZone.classList.remove('dragover');
+                });
+            }
+        });
+
+        if (dropZone) {
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    fileInput.files = files;
+                    fileNameDisplay.textContent = files[0].name;
+                    fileInfo.classList.remove('hidden');
+                    dropZone.classList.add('hidden');
+                }
+            });
+        }
+
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!fileInput || !fileInput.files || !fileInput.files.length) {
+                    if (statusEl) statusEl.textContent = 'Select a file first.';
+                    return;
+                }
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                if (statusEl) {
+                    statusEl.textContent = 'TRANSMITTING SIGNALS...';
+                    statusEl.style.color = 'var(--secondary)';
+                }
+                try {
+                    const res = await fetch('/api/sensors/ingest-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (!res.ok || data.error) {
+                        if (statusEl) {
+                            statusEl.textContent = data.error || 'Transmission Failed.';
+                            statusEl.style.color = 'var(--error)';
+                        }
+                        return;
+                    }
+                    if (statusEl) {
+                        statusEl.textContent = `SYNC COMPLETE. INGESTED: ${data.ingested} NODES`;
+                        statusEl.style.color = 'var(--success)';
+                    }
+                    
+                    // Reset form after 2 seconds
+                    setTimeout(() => {
+                        fileInput.value = '';
+                        fileInfo.classList.add('hidden');
+                        dropZone.classList.remove('hidden');
+                        if (statusEl) statusEl.textContent = '';
+                        loadAdminSensors();
+                    }, 2000);
+
+                } catch (err) {
+                    if (statusEl) {
+                        statusEl.textContent = 'LINK INTERRUPTED. RETRY.';
+                        statusEl.style.color = 'var(--error)';
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/ml_script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Directory | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            min-height: calc(100vh - 80px);
+        }
+        .admin-sidebar {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 104px;
+        }
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .side-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .side-nav a:hover, .side-nav a.active {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .side-nav a.active {
+            box-shadow: 0 4px 12px rgba(5, 59, 80, 0.2);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+        .data-table td {
+            padding: 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--primary);
+        }
+        .role-badge {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+        .role-admin { background-color: #FEF3C7; color: #92400E; }
+        .role-op { background-color: #DBEAFE; color: #1E40AF; }
+        .role-view { background-color: #F3F4F6; color: #374151; }
+        
+        .status-dot {
+            height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+        }
+        .status-online { background-color: #10B981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+        .status-offline { background-color: #EF4444; }
+
+        .flash-msg {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .flash-msg.success { background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .flash-msg.error { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <div style="font-size: 13px; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user-shield"></i> {{ user.username|upper }}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div class="admin-layout">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <div style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 12px;">Operational Level</div>
+                    <div style="background-color: var(--secondary); color: var(--primary); display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800;">
+                        {{ user.role|upper }}
+                    </div>
+                </div>
+                <nav class="side-nav">
+                    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-th-large"></i> Command Center</a>
+                    <a href="{{ url_for('admin_stakeholders') }}"><i class="fas fa-users-rectangle"></i> Stakeholders</a>
+                    <a href="{{ url_for('admin_users') }}" class="active"><i class="fas fa-address-card"></i> User Directory</a>
+                    <a href="{{ url_for('admin_config') }}"><i class="fas fa-sliders"></i> System Logic</a>
+                    <a href="{{ url_for('admin_classify') }}"><i class="fas fa-microchip"></i> ML Terminal</a>
+                    <div style="height: 1px; background-color: var(--border); margin: 16px 0;"></div>
+                    <a href="{{ url_for('dashboard') }}"><i class="fas fa-gauge-high"></i> Monitoring Portal</a>
+                    <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i> Terminate Session</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                            <i class="fas fa-address-book"></i> Access Governance
+                        </div>
+                        <h1 style="font-size: 36px; color: var(--primary);">User Directory</h1>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-msg {{ category }}">
+                                <i class="fas fa-{{ 'circle-check' if category == 'success' else 'triangle-exclamation' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                    <div class="card" style="padding: 24px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Total Registrations</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--primary);">{{ users|length }}</div>
+                    </div>
+                    <div class="card" style="padding: 24px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Admin Hierarchy</div>
+                        <div style="font-size: 28px; font-weight: 800; color: var(--secondary);">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</div>
+                    </div>
+                    <div class="card" style="padding: 24px; text-align: center;">
+                        <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Authenticated State</div>
+                        <div style="font-size: 28px; font-weight: 800; color: #20C997;">{{ users|selectattr('active')|list|length }}</div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Identity / UID</th>
+                                <th>Communication Channel</th>
+                                <th>Access Clearance</th>
+                                <th>Account Status</th>
+                                <th>Last Protocol Sync</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 800; font-size: 15px;">{{ u.username }}</div>
+                                    <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">STAMP_{{ u.id }}</div>
+                                </td>
+                                <td>
+                                    <div style="font-size: 13px; font-weight: 600;">{{ u.email }}</div>
+                                    <div style="font-size: 11px; opacity: 0.6;">Verified Primary</div>
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_update_user_role', user_id=u.id) }}">
+                                        <select name="role" onchange="this.form.submit()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 12px; font-weight: 700; background-color: var(--bg-main); color: var(--primary);">
+                                            <option value="admin" {% if u.role == 'admin' %}selected{% endif %}>ADMIN</option>
+                                            <option value="emergency_operator" {% if u.role == 'emergency_operator' %}selected{% endif %}>EMERGENCY OP</option>
+                                            <option value="viewer" {% if u.role == 'viewer' %}selected{% endif %}>VIEWER</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    {% if u.active %}
+                                        <span style="font-size: 12px; font-weight: 700; color: #10B981;"><i class="fas fa-circle-check"></i> AUTHORIZED</span>
+                                    {% else %}
+                                        <span style="font-size: 12px; font-weight: 700; color: var(--error);"><i class="fas fa-circle-xmark"></i> REVOKED</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="font-size: 12px; font-weight: 600;">
+                                        {% if u.last_login %}
+                                            {{ u.last_login.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">NOT_SYNCED</span>
+                                        {% endif %}
+                                    </div>
+                                    <div style="font-size: 11px; opacity: 0.6;">Created: {{ u.created_at.strftime('%Y-%m-%d') if u.created_at else 'N/A' }}</div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" style="padding: 64px; text-align: center; opacity: 0.4;">
+                                    <i class="fas fa-user-secret" style="font-size: 32px; margin-bottom: 16px; display: block;"></i>
+                                    NO CLEARANCE RECORDS DETECTED
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Protocol Guide -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 16px;">
+                    <div class="card" style="padding: 24px; border-top: 4px solid var(--secondary);">
+                        <h4 style="font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 12px;"><i class="fas fa-crown"></i> ADMIN CLEARANCE</h4>
+                        <p style="font-size: 12px; line-height: 1.6; color: var(--text-muted);">Unrestricted access to core infrastructure, user provisioning, and logic modification.</p>
+                    </div>
+                    <div class="card" style="padding: 24px; border-top: 4px solid #3B82F6;">
+                        <h4 style="font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 12px;"><i class="fas fa-bolt"></i> EMERGENCY OP</h4>
+                        <p style="font-size: 12px; line-height: 1.6; color: var(--text-muted);">Operational control for alert deployment and data analysis. Restricted from system logic.</p>
+                    </div>
+                    <div class="card" style="padding: 24px; border-top: 4px solid #9CA3AF;">
+                        <h4 style="font-size: 14px; font-weight: 800; color: var(--primary); margin-bottom: 12px;"><i class="fas fa-eye"></i> VIEWER PROTOCOL</h4>
+                        <p style="font-size: 12px; line-height: 1.6; color: var(--text-muted);">Read-only monitoring access. No deployment or modification capabilities authorized.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/ml_script.js') }}"></script>
+</body>
+</html>

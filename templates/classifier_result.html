@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligence Report | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for(submit_endpoint) }}">New Analysis</a>
+                <a href="{{ url_for('dashboard') }}">Control Panel</a>
+                <a href="{{ url_for('text_analysis') }}">Sentiment Engine</a>
+                <a href="{{ url_for('reports') }}">Reports</a>
+                <a href="{{ url_for('classify') }}">Visual Intelligence</a>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--border); padding-bottom: 24px;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 12px; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                    <i class="fas fa-file-invoice"></i> Analysis Report #{{ range(1000, 9999)|random }}
+                </div>
+                <h1 style="font-size: 36px; color: var(--primary);">Neural Classification Output</h1>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 4px;">Confidence Index</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--secondary);">{{ (confidence * 100)|round(2) }}%</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 32px; margin-bottom: 48px;">
+            <div class="card" style="padding: 32px; background-color: var(--primary); color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <div style="font-size: 14px; opacity: 0.7; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Primary Classification</div>
+                <div style="font-size: 48px; font-weight: 800; color: var(--secondary); margin-bottom: 16px;">{{ label|upper }}</div>
+                <div style="background-color: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 600;">
+                    <i class="fas fa-shield-check"></i> High Precision Match
+                </div>
+            </div>
+            <div class="card" style="padding: 0; overflow: hidden; display: flex;">
+                <div style="flex: 1; padding: 24px; border-right: 1px solid var(--border);">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary);"><i class="fas fa-image"></i> Source Module</h3>
+                    <img src="{{ uploaded_image }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                </div>
+                <div style="flex: 1; padding: 24px;">
+                    <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--primary);"><i class="fas fa-microchip"></i> Neural Attention</h3>
+                    <img src="{{ heatmap_image }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 64px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <h2 style="font-size: 24px; color: var(--primary);"><i class="fas fa-layer-group"></i> Explainable AI: Grad-CAM Visualization</h2>
+                <div style="height: 1px; flex: 1; background-color: var(--border);"></div>
+            </div>
+            <div class="card" style="padding: 24px; text-align: center;">
+                <img src="{{ overlay_image }}" style="max-width: 100%; border-radius: 8px; box-shadow: var(--shadow);">
+                <p style="margin-top: 20px; color: var(--text-muted); font-size: 14px; max-width: 700px; margin-left: auto; margin-right: auto;">
+                    The heatmap above highlights the specific pixels and patterns the neural network prioritized to reach its conclusion. Red regions indicate the highest influence on the classification output.
+                </p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px;">
+            <div class="card" style="padding: 32px; border-top: 4px solid var(--secondary);">
+                <h3 style="font-size: 20px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-lightbulb"></i> Response Strategies</h3>
+                {% if label|lower == 'flood' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Monitor local weather and flood alerts; evacuate if authorities advise.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Move vehicles and valuables to higher ground before water rises.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Have an emergency kit and family communication plan ready.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Know your evacuation routes and shelter locations in advance.</li>
+                </ul>
+                {% elif label|lower == 'wildfire' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Evacuate early when advised; do not wait until the last moment.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Prepare a go-bag with documents, medications, and essential supplies.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Create defensible space and keep gutters and roofs clear of debris.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Monitor official fire and air quality updates regularly.</li>
+                </ul>
+                {% elif label|lower == 'earthquake' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Identify safe spots in each room (under sturdy furniture, away from windows).</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Secure heavy items and know how to shut off gas, water, and electricity.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Maintain an emergency kit and family meeting plan.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Expect aftershocks and avoid damaged structures until they are declared safe.</li>
+                </ul>
+                {% elif label|lower == 'cyclone' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Follow evacuation orders; leave early if you are in a surge- or flood-prone area.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Secure or bring indoors loose objects; reinforce doors and shutters.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Keep a battery-powered radio and emergency kit; have a family plan.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Stay informed via official weather and emergency channels.</li>
+                </ul>
+                {% else %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Follow instructions from local emergency services and official alerts.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Keep an emergency kit and have a family communication plan.</li>
+                </ul>
+                {% endif %}
+            </div>
+
+            <div class="card" style="padding: 32px; border-top: 4px solid var(--error);">
+                <h3 style="font-size: 20px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-shield-alt"></i> Immediate Safety Protocols</h3>
+                {% if label|lower == 'flood' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Move to higher ground; do not walk or drive through floodwater.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Do not touch electrical equipment if you are wet or standing in water.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Avoid contact with floodwater—it may be contaminated or hide hazards.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Stay tuned to local alerts and evacuation orders; follow official instructions.</li>
+                </ul>
+                {% elif label|lower == 'wildfire' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Stay indoors; close windows and doors; run AC on recirculation if smoke is heavy.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Wear N95 or P100 masks outdoors when air quality is poor.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Know your evacuation routes and meeting points; leave when advised.</li>
+                </ul>
+                {% elif label|lower == 'earthquake' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Drop, Cover, and Hold On—under a sturdy desk or table until shaking stops.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Stay away from windows, glass, and heavy objects that could fall.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> If outdoors, move to an open area away from buildings, trees, and power lines.</li>
+                </ul>
+                {% elif label|lower == 'cyclone' %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Stay indoors in a secure room away from windows; use lowest floor if multi-story.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Do not go outside until officials declare the storm has passed.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Avoid using candles if power is out; use battery lights.</li>
+                </ul>
+                {% else %}
+                <ul class="feature-list" style="display: flex; flex-direction: column; gap: 12px;">
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Follow instructions from local emergency services.</li>
+                    <li><i class="fas fa-check-circle" style="color: var(--error);"></i> Keep an emergency kit with essentials.</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ url_for(submit_endpoint) }}" class="btn btn-outline" style="padding: 12px 40px;">
+                <i class="fas fa-redo"></i> NEW ANALYTICAL SESSION
+            </a>
+        </div>
+    </main>
+
+    <footer class="footer" style="margin-top: 80px;">
+        <div class="container footer-content">
+            <div class="footer-logo">DisasterAI Operations</div>
+            <div style="font-size: 14px; opacity: 0.6;">&copy; 2026 Operational Intelligence Unit. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/ml_script.js') }}"></script>
+    <script>
+        (function storePredictedLabel() {
+            var label = "{{ label|lower }}";
+            if (label && label !== "unknown") {
+                try {
+                    localStorage.setItem("disaster_label", label);
+                } catch (e) {
+                    // ignore storage errors
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
+

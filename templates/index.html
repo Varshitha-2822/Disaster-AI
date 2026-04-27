@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DisasterAI – AI-powered Natural Calamity Analysis and Damage Response Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.5;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="#features">Capabilities</a>
+                <a href="#stats">Global Impact</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline" style="padding: 8px 16px;">Log In</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 8px 16px;">Deploy Now</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-pattern"></div>
+            <div class="container hero-grid">
+                <div class="hero-text" style="position: relative; z-index: 1;">
+                    <div
+                        style="text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: var(--secondary); margin-bottom: 12px; font-size: 14px;">
+                        Next-Gen Crisis Intelligence</div>
+                    <h1 class="hero-title">DisasterAI – AI-powered Natural Calamity Analysis</h1>
+                    <p class="hero-subtitle">Advanced computational intelligence for real-time disaster prediction,
+                        damage assessment, and unified response coordination.</p>
+                    <div style="display: flex; gap: 16px;">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">Start Analysis <i
+                                class="fas fa-arrow-right"></i></a>
+                        <a href="#features" class="btn btn-outline">Explore Platform</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="{{ url_for('static', filename='disaster_ai_hero_1774701984157.png') }}" alt="DisasterAI Command Center"
+                        style="border: 4px solid var(--primary); transform: perspective(1000px) rotateY(-5deg);">
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features" style="background-color: #fff;">
+            <div class="container">
+                <div style="text-align: center; max-width: 700px; margin: 0 auto 60px;">
+                    <h2 style="font-size: 36px; color: var(--primary); margin-bottom: 16px;">Enterprise-Grade Disaster
+                        Intelligence</h2>
+                    <p style="color: var(--text-muted); font-size: 18px;">Our platform integrates multi-spectral
+                        satellite imagery, IoT sensor feeds, and social sentiment to provide a 360-degree view of any
+                        crisis.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-brain feature-icon"></i>
+                        <h3 class="feature-name">Hybrid AI Core</h3>
+                        <p class="feature-desc">Fusing deep learning with predictive agent models for unmatched accuracy
+                            in calamity forecasting and trend projection.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-eye feature-icon"></i>
+                        <h3 class="feature-name">Visual Damage Scoping</h3>
+                        <p class="feature-desc">Real-time object detection and segmentation on high-res aerial imagery
+                            to quantify damage in minutes, not days.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-network-wired feature-icon"></i>
+                        <h3 class="feature-name">Intelligent Response</h3>
+                        <p class="feature-desc">Autonomous agents that dynamically optimize relief logistics and
+                            resource allocation based on severity heatmaps.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-globe-americas feature-icon"></i>
+                        <h3 class="feature-name">GIS Integration</h3>
+                        <p class="feature-desc">Advanced spatial data processing for terrain-aware flood modeling and
+                            landslide risk assessment.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bolt feature-icon"></i>
+                        <h3 class="feature-name">Real-time Twitter Stream</h3>
+                        <p class="feature-desc">Extracting critical ground-level information from social media during
+                            active disasters with lightning speed.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-file-invoice-dark feature-icon"></i>
+                        <h3 class="feature-name">Automated Reporting</h3>
+                        <p class="feature-desc">Generate comprehensive post-disaster analysis reports for government and
+                            NGO stakeholders instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stats" style="padding: 100px 0; background-color: var(--primary); color: #fff;">
+            <div class="container"
+                style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; text-align: center;">
+                <div>
+                    <div style="font-size: 48px; font-weight: 800; margin-bottom: 8px;">150+</div>
+                    <div style="opacity: 0.8; font-weight: 500;">Satellite Nodes</div>
+                </div>
+                <div>
+                    <div style="font-size: 48px; font-weight: 800; margin-bottom: 8px;">98.4%</div>
+                    <div style="opacity: 0.8; font-weight: 500;">Predictive Accuracy</div>
+                </div>
+                <div>
+                    <div style="font-size: 48px; font-weight: 800; margin-bottom: 8px;">12s</div>
+                    <div style="opacity: 0.8; font-weight: 500;">Alert Latency</div>
+                </div>
+                <div>
+                    <div style="font-size: 48px; font-weight: 800; margin-bottom: 8px;">2M+</div>
+                    <div style="opacity: 0.8; font-weight: 500;">Lives Impacted</div>
+                </div>
+            </div>
+        </section>
+
+        <section style="padding: 100px 0; text-align: center;">
+            <div class="container">
+                <div class="card"
+                    style="max-width: 900px; margin: 0 auto; padding: 60px; border: 2px solid var(--primary);">
+                    <h2 style="font-size: 32px; margin-bottom: 24px;">Ready to enhance your disaster response?</h2>
+                    <p style="font-size: 18px; color: var(--text-muted); margin-bottom: 40px;">Join the organizations
+                        using DisasterAI to build a safer, more resilient future for communities worldwide.</p>
+                    <div style="display: flex; gap: 16px; justify-content: center;">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary"
+                            style="padding: 16px 40px; font-size: 18px;">Create Enterprise Account</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline"
+                            style="padding: 16px 40px; font-size: 18px;">Partner Login</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-satellite-dish"></i> DisasterAI
+            </div>
+            <div style="opacity: 0.7; font-size: 14px;">
+                &copy; 2026 DisasterAI. Professional Disaster Intelligence Platform.
+            </div>
+            <div style="display: flex; gap: 24px;">
+                <a href="#" style="color: #fff; opacity: 0.7;"><i class="fab fa-twitter"></i></a>
+                <a href="#" style="color: #fff; opacity: 0.7;"><i class="fab fa-linkedin"></i></a>
+                <a href="#" style="color: #fff; opacity: 0.7;"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

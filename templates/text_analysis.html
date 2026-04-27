@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Engine | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .signal-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            background-color: var(--bg-main);
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+        .sentiment-pos { color: #20C997; border-color: #20C997; }
+        .sentiment-neg { color: #FF4D4D; border-color: #FF4D4D; }
+        .analysis-log {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 16px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Control Panel</a>
+                <a href="{{ url_for('text_analysis') }}">Linguistic Hub</a>
+                <a href="{{ url_for('classify') }}">Visual Intelligence</a>
+                <a href="{{ url_for('reports') }}">Strategic Reports</a>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div style="margin-bottom: 40px;">
+            <div style="display: flex; align-items: center; gap: 12px; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                <i class="fas fa-comment-nodes"></i> Linguistic Analysis Module
+            </div>
+            <h1 style="font-size: 36px; color: var(--primary); margin-bottom: 12px;">Real-time Sentiment & Risk Scanning</h1>
+            <p style="color: var(--text-muted); font-size: 18px; max-width: 800px;">Intercept and analyze high-velocity social streams and field reports to extract emotional valence, structural risks, and geographic cues.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 32px;">
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                <!-- Manual Entry -->
+                <div class="card" style="padding: 32px;">
+                    <h3 style="margin-bottom: 24px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 12px;"><i class="fas fa-keyboard"></i> Raw Intelligence Injection</h3>
+                    <form id="textAnalyzeForm">
+                        <div style="display: grid; grid-template-columns: 200px 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div class="form-group">
+                                <label for="textSource">Intelligence Source</label>
+                                <input id="textSource" name="source" type="text" placeholder="twitter / news / field" value="twitter" style="width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label for="textInput">Raw Payload</label>
+                                <textarea id="textInput" name="text" rows="4" placeholder="Paste intelligence snippet here..." required style="width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px;"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-brain"></i> EXECUTE ANALYTICAL SWEEP
+                        </button>
+                    </form>
+                    <div id="textAnalyzeResult" style="margin-top: 24px;"></div>
+                </div>
+
+                <!-- News Module -->
+                <div class="card" style="padding: 32px; border-left: 5px solid var(--secondary);">
+                    <h3 style="margin-bottom: 24px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 12px;"><i class="fas fa-rss"></i> News & Field Feed Sync</h3>
+                    <form id="tweetFetchForm">
+                        <div style="display: grid; grid-template-columns: 1fr 120px; gap: 20px; margin-bottom: 24px;">
+                            <div class="form-group">
+                                <label for="tweetQuery">Target Query</label>
+                                <input id="tweetQuery" name="query" type="text" value="flood OR cyclone OR earthquake" placeholder="Global search query...">
+                            </div>
+                            <div class="form-group">
+                                <label for="tweetMax">Log Depth</label>
+                                <input id="tweetMax" name="max_results" type="number" min="10" max="100" value="20">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-outline" style="width: 100%; border-color: var(--secondary); color: var(--secondary);">
+                            <i class="fas fa-satellite-dish"></i> SYNC NEWS FEEDS
+                        </button>
+                    </form>
+                    <div id="tweetFetchResult" style="margin-top: 24px;"></div>
+                </div>
+            </div>
+
+            <!-- Summary Sidebar -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                <div class="card" style="padding: 32px; background-color: var(--primary); color: #fff;">
+                    <h3 style="margin-bottom: 24px; font-size: 18px;"><i class="fas fa-chart-pie"></i> Fleet Status</h3>
+                    <div id="textSummaryPanel" style="display: flex; flex-direction: column; gap: 20px; font-size: 14px;">
+                        <div style="text-align: center; padding: 40px 0;">
+                            <i class="fas fa-circle-notch fa-spin" style="font-size: 24px; opacity: 0.5;"></i>
+                            <div style="margin-top: 12px; opacity: 0.7;">Synchronizing index...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 24px;">
+                    <h4 style="font-size: 14px; margin-bottom: 16px; color: var(--primary);"><i class="fas fa-microchip"></i> Latest Sensor Signals</h4>
+                    <div id="textSensorPanel" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 12px;">
+                        <div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 10px;">Rainfall</div>
+                            <div id="textSensorRain" style="font-size: 16px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                        <div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 10px;">River</div>
+                            <div id="textSensorRiver" style="font-size: 16px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                        <div style="padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 10px;">Soil</div>
+                            <div id="textSensorSoil" style="font-size: 16px; font-weight: 800; color: var(--primary);">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="padding: 24px;">
+                    <h4 style="font-size: 14px; margin-bottom: 16px; color: var(--primary);"><i class="fas fa-info-circle"></i> Capability Matrix</h4>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                            <i class="fas fa-check" style="color: var(--secondary);"></i> <span>Entity Extraction (NER)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                            <i class="fas fa-check" style="color: var(--secondary);"></i> <span>Disaster Taxonomy Mapping</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 13px;">
+                            <i class="fas fa-check" style="color: var(--secondary);"></i> <span>Geographic Geofencing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/ml_script.js') }}"></script>
+    <script>
+        async function loadTextSummary() {
+            const res = await fetch('/api/text/summary');
+            const data = await res.json();
+            const panel = document.getElementById('textSummaryPanel');
+            if (!panel) return;
+            
+            panel.innerHTML = `
+                <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 8px;">
+                    <div style="opacity: 0.7; font-size: 12px; font-weight: 700; text-transform: uppercase;">Total Active Mentions</div>
+                    <div style="font-size: 24px; font-weight: 800; color: var(--secondary);">${data.total}</div>
+                </div>
+                <div>
+                    <div style="opacity: 0.7; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Sentiment Distribution</div>
+                    <div style="display: flex; gap: 4px; height: 8px; border-radius: 4px; overflow: hidden; background: rgba(255,255,255,0.1);">
+                        <div style="width: ${ (data.sentiment.positive / data.total) * 100 }%; background: #20C997;"></div>
+                        <div style="width: ${ (data.sentiment.neutral / data.total) * 100 }%; background: #f8fafc;"></div>
+                        <div style="width: ${ (data.sentiment.negative / data.total) * 100 }%; background: #FF4D4D;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 8px; font-weight: 600;">
+                        <span style="color: #20C997;">POS: ${data.sentiment.positive}</span>
+                        <span>NEU: ${data.sentiment.neutral}</span>
+                        <span style="color: #FF4D4D;">NEG: ${data.sentiment.negative}</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="opacity: 0.7; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Risk Signal Index</div>
+                    <div style="font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-tachometer-alt"></i> ${typeof data.risk_signal === 'number' ? data.risk_signal.toFixed(1) : 'N/A'}
+                    </div>
+                </div>
+                <div>
+                    <div style="opacity: 0.7; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Regional Clusters</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${(data.top_locations || []).slice(0, 5).map(loc => `<span class="signal-pill" style="background: rgba(255,255,255,0.05); color: #fff; border: none;">${loc}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadSensorSummary() {
+            try {
+                const res = await fetch('/api/sensors/latest');
+                const data = await res.json();
+                const latest = data.latest || {};
+                const rain = (latest.rainfall && latest.rainfall[0]) ? latest.rainfall[0].value : '--';
+                const river = (latest.river && latest.river[0]) ? latest.river[0].value : '--';
+                const soil = (latest.soil && latest.soil[0]) ? latest.soil[0].value : '--';
+                const rainEl = document.getElementById('textSensorRain');
+                const riverEl = document.getElementById('textSensorRiver');
+                const soilEl = document.getElementById('textSensorSoil');
+                if (rainEl) rainEl.textContent = rain !== '--' ? `${rain} mm` : '--';
+                if (riverEl) riverEl.textContent = river !== '--' ? `${river} m` : '--';
+                if (soilEl) soilEl.textContent = soil !== '--' ? soil : '--';
+            } catch (e) {
+                console.error('Sensor summary load failed:', e);
+            }
+        }
+
+        const form = document.getElementById('textAnalyzeForm');
+        const result = document.getElementById('textAnalyzeResult');
+        if (form) {
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                result.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Processing neural sweep...</div>';
+                const text = document.getElementById('textInput').value;
+                const source = document.getElementById('textSource').value || 'unknown';
+                const res = await fetch('/api/text/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, source })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    result.innerHTML = `<div style="background:#FFF5F5; color:#C53030; padding:16px; border-radius:8px; border:1px solid #FEB2B2;">${data.error}</div>`;
+                } else {
+                    result.innerHTML = `
+                        <div class="analysis-log">
+                            <div style="margin-bottom:12px; font-weight: 800; color: var(--primary);">[ANALYSIS_LOG_OUTPUT]</div>
+                            <div style="display:grid; grid-template-columns: 140px 1fr; gap:12px;">
+                                <span style="opacity:0.6;">SENTIMENT:</span> <span class="signal-pill ${data.sentiment === 'positive' ? 'sentiment-pos' : (data.sentiment === 'negative' ? 'sentiment-neg' : '')}">${data.sentiment.toUpperCase()}</span>
+                                <span style="opacity:0.6;">DISASTER_TAGS:</span> <span>${data.disaster_types.join(', ') || 'NONE'}</span>
+                                <span style="opacity:0.6;">GEO_HINTS:</span> <span>${data.location_hints.join(', ') || 'NOT_FOUND'}</span>
+                                <span style="opacity:0.6;">RISK_LEVEL:</span> <span style="color:${data.alert_level === 'high' ? '#FF4D4D' : 'var(--secondary)'}; font-weight:700;">${(data.alert_level || 'INFO').toUpperCase()}</span>
+                                <span style="opacity:0.6;">ENTITIES:</span> <span>${(data.entities || []).map(e => `${e.text}[${e.label}]`).join(', ') || 'NONE'}</span>
+                            </div>
+                        </div>
+                    `;
+                    await loadTextSummary();
+                }
+            });
+        }
+
+        function buildQueryFromLabel(label) {
+            if (!label) return '';
+            const map = {
+                flood: 'flood OR flooding OR inundation',
+                cyclone: 'cyclone OR hurricane OR typhoon OR storm surge',
+                earthquake: 'earthquake OR tremor OR aftershock OR seismic',
+                wildfire: 'wildfire OR forest fire OR smoke OR firestorm'
+            };
+            return map[label] || '';
+        }
+
+        (function setDefaultQueryFromLabel() {
+            const input = document.getElementById('tweetQuery');
+            if (!input) return;
+            const label = (localStorage.getItem('disaster_label') || '').toLowerCase();
+            const auto = buildQueryFromLabel(label);
+            if (auto) {
+                input.value = `${auto} lang:en`;
+            }
+        })();
+
+        const tweetForm = document.getElementById('tweetFetchForm');
+        const tweetResult = document.getElementById('tweetFetchResult');
+        if (tweetForm) {
+            tweetForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const query = document.getElementById('tweetQuery').value;
+                const max_results = parseInt(document.getElementById('tweetMax').value || '20', 10);
+                tweetResult.innerHTML = '<div style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Syncing news feeds...</div>';
+                const res = await fetch('/api/text/fetch-twitter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, max_results })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    tweetResult.innerHTML = `<div style="background:#FFF5F5; color:#C53030; padding:16px; border-radius:8px; border:1px solid #FEB2B2;">${data.error}</div>`;
+                } else {
+                    const records = Array.isArray(data.records) ? data.records : [];
+                    const itemsHtml = records.slice(0, 10).map((item) => {
+                        const text = item.text || '';
+                        const created = item.created_at || item.date || '';
+                        const source = item.source || item.type || 'news';
+                        const alertLevel = (item.alert_level || 'info').toLowerCase();
+                        const alertColor = alertLevel === 'critical' ? '#DC2626' : alertLevel === 'warning' ? '#D97706' : 'var(--secondary)';
+                        return `
+                            <div style="border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 12px; background: #fff;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                    <span class="signal-pill" style="text-transform: uppercase; font-size: 10px;">${source}</span>
+                                    <span style="font-size: 11px; opacity: 0.6;">${created}</span>
+                                </div>
+                                <div style="font-size: 13px; line-height: 1.5; color: var(--primary); margin-bottom: 8px;">${text}</div>
+                                <div style="font-size: 11px; font-weight: 700; color: ${alertColor};">ALERT_LEVEL: ${alertLevel.toUpperCase()}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    tweetResult.innerHTML = `
+                        <div style="background: var(--bg-main); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                            <div style="display: flex; gap: 24px;">
+                                <div><span style="opacity: 0.6; font-size: 12px;">FETCHED:</span> <span style="font-weight: 700;">${data.fetched}</span></div>
+                                <div><span style="opacity: 0.6; font-size: 12px;">INGESTED:</span> <span style="font-weight: 700;">${data.ingested}</span></div>
+                            </div>
+                        </div>
+                        ${itemsHtml || '<div style="text-align:center; opacity:0.5;">No items matches the spectral profile.</div>'}
+                    `;
+                    await loadTextSummary();
+                }
+            });
+        }
+
+        loadTextSummary();
+        loadSensorSummary();
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Deployment | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .auth-container {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-main);
+        }
+        .hero-pattern {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.6;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="auth-container" style="padding: 60px 0;">
+        <div class="hero-pattern"></div>
+        <div class="container" style="display: flex; justify-content: center; position: relative; z-index: 1;">
+            <div class="card auth-card" style="max-width: 550px; border-top: 5px solid var(--secondary);">
+                <div class="auth-header">
+                    <a href="/" class="logo" style="justify-content: center; margin-bottom: 24px;">
+                        <i class="fas fa-satellite-dish"></i>
+                        <span>DisasterAI</span>
+                    </a>
+                    <h1>Platform Deployment</h1>
+                    <p style="color: var(--text-muted);">Request access to the DisasterAI unified response network.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div style="background-color: #FED7D7; color: #C53030; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; font-weight: 500;">
+                                    <i class="fas fa-exclamation-circle"></i> {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="input-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" placeholder="e.g. analyst_01" required minlength="3" maxlength="30" autocomplete="username">
+                        </div>
+                        <div class="input-group">
+                            <label for="email">Work Email</label>
+                            <input type="email" id="email" name="email" placeholder="name@org.gov" required autocomplete="email">
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="input-group">
+                            <label for="password">Access Key</label>
+                            <input type="password" id="password" name="password" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password">
+                        </div>
+                        <div class="input-group">
+                            <label for="confirm_password">Verify Key</label>
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="Repeat key" required minlength="6" autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="role">Operational Role</label>
+                        <select id="role" name="role" required style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); font-family: inherit; background-color: #fff;">
+                            <option value="">Select your role</option>
+                            <option value="viewer">Crisis Analyst (View Only)</option>
+                            <option value="emergency_operator">Field Responder (Trigger Alerts)</option>
+                            <option value="admin">Regional Coordinator (Full Access)</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--text-muted); cursor: pointer;">
+                            <input type="checkbox" required style="margin-top: 4px; width: 18px; height: 18px;">
+                            <span>I agree to the Operational Security Protocol and data usage policies of the DisasterAI network.</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; background-color: var(--primary);">
+                        Initialize Account <i class="fas fa-user-plus" style="margin-left: 8px;"></i>
+                    </button>
+
+                    <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);">
+                        <p style="color: var(--text-muted); font-size: 14px;">
+                            Already deployed? <a href="{{ url_for('login') }}" style="color: var(--primary); font-weight: 700;">Sign in to Terminal</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Access keys do not match.');
+            }
+        });
+    </script>
+</body>
+</html>
+

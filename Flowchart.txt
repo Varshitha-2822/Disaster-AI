@@ -1,0 +1,86 @@
+Image classification:
+====================
+1. Dataset Preparation
+    -   Dataset Link : https://www.kaggle.com/datasets/alex1994/natural-disaster-image-dataset
+    -   Load dataset 
+    -   Apply transforms (resize, normalize, augment)
+    -   Create DataLoaders
+    -   Split train/val/test
+    -   Define class labels (cyclone, earthquake, flood, wildfire)
+2. Visualizations
+    -   Class distribution bar chart
+    -   Sample images per class
+3. Trainig setup
+    -   Define train_model() function
+    -   Define evaluate_model() function
+    -   Set device (CPU/GPU)
+    -   Define loss/optimizer/scheduler
+4. Model Training
+    -   ResNet50
+    -   VGG16
+    -   MobileNetV2
+    -   EfficientNet-B0
+    -   Track per-epoch metrics
+5. Model saving
+    -   Save model weights (.pth)
+    -   Save best model (efficientnet_b0.pth)
+6. Model Evaluation
+    -   Classification report
+    -   Confusion matrix
+    -   Accuracy/Loss curves
+    -   Store results for comparison
+7. Model comparison
+    -   Create performance table
+    -   Plot comparison graphs
+    -   Select best model (EfficientNet-B0)
+8. Prediction
+    -   Load best model (EfficientNet-B0)
+    -   Apply inference transforms (Resize 224, Normalize 0.5)
+    -   Softmax to class + confidence
+    -   Allow JPG/JPEG/PNG input
+9. GRAD-CAM
+    -   Generate heatmap (conv_head)
+    -   Overlay heatmap on original image
+    -   Save heatmap + overlay outputs
+
+
+Flask Application:
+=================
+1. Dashboard Access & User Management
+    - Guest access / Login / Signup
+    - Admin / Emergency Operator / Viewer roles
+    - Default admin creation + password hash
+    - Role-based access control (admin_required / emergency_operator_required)
+
+2. Flood Monitoring Dashboard
+    - Static hazard map visualization
+    - Live risk monitoring (rainfall, river level, flood risk)
+    - Zone dataset for all India (states/districts)
+    - Risk prediction using ML ensemble (RF/LR/XGB) + fallback heuristic
+    - Live data feed from sensors + fallback defaults
+    - Sensor APIs (ingest JSON/CSV, latest, history)
+    - Text/News analytics page (sentiment, disaster types, locations)
+    - Fetch social/news signals (Twikit/Nitter/ReliefWeb RSS)
+
+3. Emergency Alert Flow
+    - Identify high-risk zones
+    - Trigger alerts to stakeholders
+    - Alert dispatch status and logging
+    - SMTP-configured email alerts + fallback dev logging
+
+4. Reports & Admin Panel
+    - Zone reports and analytics
+    - Stakeholder and system configuration management
+    - Stakeholder CRUD + CSV bulk upload
+    - System config (SMTP + alert thresholds)
+    - User role management
+    - Alert history/cleanup
+    - GIS processing trigger + status (hazard map, zones, vulnerability)
+    - Background scheduler (hourly fetch, 6h risk recalc, 30m text ingest, daily cleanup)
+
+5. ML Classification Module
+    - Upload disaster image
+    - EfficientNet-B0 prediction
+    - Grad-CAM heatmap and overlay result
+    - Save uploads/heatmaps/overlays to static folders
+Note: all the images manullay moved to single folder

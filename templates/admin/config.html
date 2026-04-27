@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logic | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+            min-height: calc(100vh - 80px);
+        }
+        .admin-sidebar {
+            background-color: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 104px;
+        }
+        .side-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .side-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .side-nav a:hover, .side-nav a.active {
+            background-color: var(--primary);
+            color: #fff;
+        }
+        .side-nav a.active {
+            box-shadow: 0 4px 12px rgba(5, 59, 80, 0.2);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .flash-msg {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .flash-msg.success { background-color: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+        .flash-msg.error { background-color: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <div style="font-size: 13px; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-user-shield"></i> {{ user.username|upper }}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div class="admin-layout">
+            <!-- Sidebar -->
+            <aside class="admin-sidebar">
+                <div style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+                    <div style="font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 12px;">Operational Level</div>
+                    <div style="background-color: var(--secondary); color: var(--primary); display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800;">
+                        {{ user.role|upper }}
+                    </div>
+                </div>
+                <nav class="side-nav">
+                    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-th-large"></i> Command Center</a>
+                    <a href="{{ url_for('admin_stakeholders') }}"><i class="fas fa-users-rectangle"></i> Stakeholders</a>
+                    <a href="{{ url_for('admin_users') }}"><i class="fas fa-address-card"></i> User Directory</a>
+                    <a href="{{ url_for('admin_config') }}" class="active"><i class="fas fa-sliders"></i> System Logic</a>
+                    <a href="{{ url_for('admin_classify') }}"><i class="fas fa-microchip"></i> ML Terminal</a>
+                    <div style="height: 1px; background-color: var(--border); margin: 16px 0;"></div>
+                    <a href="{{ url_for('dashboard') }}"><i class="fas fa-gauge-high"></i> Monitoring Portal</a>
+                    <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i> Terminate Session</a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div>
+                        <div style="color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                            <i class="fas fa-sliders"></i> Core Infrastructure
+                        </div>
+                        <h1 style="font-size: 36px; color: var(--primary);">System Configuration</h1>
+                    </div>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-msg {{ category }}">
+                                <i class="fas fa-{{ 'circle-check' if category == 'success' else 'triangle-exclamation' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                    <!-- SMTP Config -->
+                    <div class="card" style="padding: 32px;">
+                        <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-envelope-open-text"></i> Transmission Protocol (SMTP)</h3>
+                        <form method="POST" action="{{ url_for('admin_update_config') }}">
+                            <input type="hidden" name="config_type" value="smtp">
+                            <div class="form-group">
+                                <label><i class="fas fa-server"></i> Relay Server</label>
+                                <input type="text" name="smtp_server" value="{{ configs.get('SMTP_SERVER', 'smtp.gmail.com') }}" required>
+                                <div class="form-help">Relay hostname (e.g., smtp.gmail.com)</div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-plug"></i> Access Port</label>
+                                <input type="number" name="smtp_port" value="{{ configs.get('SMTP_PORT', '587') }}" required>
+                                <div class="form-help">TLS: 587 | SSL: 465</div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-user-shield"></i> Identity</label>
+                                <input type="text" name="smtp_user" value="{{ configs.get('SMTP_USER', '') }}" required>
+                                <div class="form-help">Authenticated relay email</div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-key"></i> Credentials</label>
+                                <input type="password" name="smtp_password" value="{{ configs.get('SMTP_PASSWORD', '') }}" required>
+                                <div class="form-help">System or App-specific token</div>
+                            </div>
+                            <button type="submit" class="btn btn-secondary w-100" style="margin-top: 12px;">
+                                <i class="fas fa-sync"></i> UPDATE PROTOCOL
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Thresholds -->
+                    <div class="card" style="padding: 32px;">
+                        <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-triangle-exclamation"></i> Alert Triggers & Logic</h3>
+                        <form method="POST" action="{{ url_for('admin_update_config') }}">
+                            <input type="hidden" name="config_type" value="thresholds">
+                            <div class="form-group">
+                                <label><i class="fas fa-bell"></i> Critical Alert Trigger</label>
+                                <input type="number" step="0.01" min="0" max="1" name="alert_threshold" value="{{ configs.get('ALERT_THRESHOLD', '0.75') }}" required>
+                                <div class="form-help">Risk score (0.00-1.00) for emergency broadcast</div>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-circle-info" style="color: #20C997;"></i> Low Risk Ceiling</label>
+                                <input type="number" step="0.01" min="0" max="1" name="risk_threshold_low" value="{{ configs.get('RISK_THRESHOLD_LOW', '0.4') }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-circle-info" style="color: #FFC107;"></i> Moderate Risk Ceiling</label>
+                                <input type="number" step="0.01" min="0" max="1" name="risk_threshold_moderate" value="{{ configs.get('RISK_THRESHOLD_MODERATE', '0.6') }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-circle-info" style="color: #F44336;"></i> High Risk Ceiling</label>
+                                <input type="number" step="0.01" min="0" max="1" name="risk_threshold_high" value="{{ configs.get('RISK_THRESHOLD_HIGH', '0.8') }}" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary w-100" style="margin-top: 12px;">
+                                <i class="fas fa-save"></i> DEPLOY LOGIC
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Current State -->
+                <div class="card" style="padding: 32px; border-left: 4px solid var(--secondary);">
+                    <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 24px;"><i class="fas fa-microchip"></i> Active Operational State</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 48px;">
+                        <div>
+                            <div class="info-row">
+                                <span class="info-label">Active Hub</span>
+                                <span class="info-value">{{ configs.get('SMTP_SERVER', 'N/A') }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Secure Port</span>
+                                <span class="info-value">{{ configs.get('SMTP_PORT', 'N/A') }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Authenticated As</span>
+                                <span class="info-value">{{ configs.get('SMTP_USER', 'None') }}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="info-row">
+                                <span class="info-label">Broadcast Floor</span>
+                                <span class="info-value" style="color: var(--secondary);">{{ (configs.get('ALERT_THRESHOLD', '0.75')|float * 100)|int }}% Risk</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Risk Spectrum</span>
+                                <span class="info-value">
+                                    <span style="color: #20C997;">{{ configs.get('RISK_THRESHOLD_LOW', '0.4') }}</span> | 
+                                    <span style="color: #FFC107;">{{ configs.get('RISK_THRESHOLD_MODERATE', '0.6') }}</span> | 
+                                    <span style="color: #F44336;">{{ configs.get('RISK_THRESHOLD_HIGH', '0.8') }}</span>
+                                </span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Logic Integrity</span>
+                                <span class="info-value" style="color: #20C997;">VERIFIED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/ml_script.js') }}"></script>
+</body>
+</html>

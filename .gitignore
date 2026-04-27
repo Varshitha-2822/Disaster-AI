@@ -1,0 +1,10 @@
+data/
+database/
+samples/
+static/
+models/
+__pycache__/
+.ipynb_checkpoints/
+*.jpg
+*.png
+*.mp4

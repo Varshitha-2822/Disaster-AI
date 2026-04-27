@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Intelligence | DisasterAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom_style.css') }}">
+    <style>
+        .hero-pattern {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(var(--border) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0.4;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+            background-color: var(--primary);
+            color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--primary);
+            font-weight: 800;
+        }
+        .info-pill {
+            background-color: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .report-table th {
+            text-align: left;
+            padding: 16px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+        .report-table td {
+            padding: 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        .personality-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            background-color: var(--bg-main);
+            color: var(--secondary);
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-main);">
+    <div class="hero-pattern"></div>
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="/" class="logo">
+                <i class="fas fa-satellite-dish"></i>
+                <span>DisasterAI</span>
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Control Panel</a>
+                <a href="{{ url_for('text_analysis') }}">Linguistic Hub</a>
+                <a href="{{ url_for('classify') }}">Visual Intelligence</a>
+                <a href="{{ url_for('reports') }}">Strategic Reports</a>
+                {% if current_user.is_admin() %}
+                <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" style="color: var(--error);"><i class="fas fa-power-off"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 40px 24px;">
+        <div style="margin-bottom: 40px;">
+            <div style="display: flex; align-items: center; gap: 12px; color: var(--secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 13px; margin-bottom: 8px;">
+                <i class="fab fa-twitter"></i> Deep Social Intercept
+            </div>
+            <h1 style="font-size: 36px; color: var(--primary); margin-bottom: 12px;">Profile Intelligence Report</h1>
+        </div>
+
+        <section class="profile-header">
+            <div class="profile-avatar">
+                {{ user_info.name[0]|upper }}
+            </div>
+            <div style="flex: 1;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <h2 style="font-size: 24px; font-weight: 700; margin: 0;">{{ user_info.name }}</h2>
+                    {% if user_info.is_blue_verified %}
+                    <i class="fas fa-check-circle" style="color: #1DA1F2; font-size: 18px;"></i>
+                    {% endif %}
+                </div>
+                <div style="font-size: 16px; opacity: 0.8; margin-bottom: 16px;">@{{ user_info.screen_name }}</div>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <span class="info-pill"><i class="fas fa-users"></i> {{ user_info.followers_count }} Followers</span>
+                    <span class="info-pill"><i class="fas fa-user-friends"></i> {{ user_info.friends_count }} Following</span>
+                    <span class="info-pill"><i class="fas fa-scroll"></i> {{ user_info.statuses_count }} Tweets</span>
+                </div>
+                {% if user_info.description %}
+                <p style="margin-top: 20px; font-size: 14px; opacity: 0.9; max-width: 600px; line-height: 1.6;">{{ user_info.description }}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="card" style="padding: 32px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <h3 style="font-size: 20px; color: var(--primary);"><i class="fas fa-brain"></i> Persona Prediction Stream</h3>
+                <div style="height: 1px; flex: 1; background-color: var(--border);"></div>
+            </div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Intercept Date</th>
+                        <th>Payload Context</th>
+                        <th style="width: 150px;">Persona Vector</th>
+                        <th style="width: 100px;">Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tweet in tweets %}
+                    <tr>
+                        <td style="font-size: 12px; color: var(--text-muted);">{{ tweet.date }}</td>
+                        <td style="line-height: 1.6;">{{ tweet.text }}</td>
+                        <td><span class="personality-pill">{{ tweet.personality|upper }}</span></td>
+                        <td style="font-weight: 700; color: var(--secondary);">{{ tweet.confidence }}%</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 48px; opacity: 0.5;">No tweet indices detected for this entity.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="{{ url_for('text_analysis') }}" class="btn btn-outline" style="padding: 12px 40px;">
+                <i class="fas fa-arrow-left"></i> RETURN TO ANALYSIS HUB
+            </a>
+        </div>
+    </main>
+</body>
+</html>
+
